@@ -3,5 +3,5 @@
   if (!data.user) window.location.href = 'https://auth.njsc.ltd/#/launch/ai'
 </script>
 
-<p>loading</p>
+<p>home</p>
 <div>{data.user}</div>
