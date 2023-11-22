@@ -22,7 +22,7 @@
     $loading = true
     if (!data.user?.token) return
     const status = await srpc.status(data.user.token)
-    if (status.type !== 'transcribe') return $loading = false
+    if (status.label !== 'transcribe') return $loading = false
     loadTask(await srpc.task(data.user.token))
     $loading = false
   }
