@@ -1,7 +1,8 @@
 <script>
+  import Status from '$lib/components/Status.svelte'
   export let data
-  if (!data.user) window.location.href = 'https://auth.njsc.ltd/#/launch/ai'
 </script>
 
 <p>home</p>
-<div>{data.user}</div>
+<div>{data.user?.name}</div>
+<Status></Status>

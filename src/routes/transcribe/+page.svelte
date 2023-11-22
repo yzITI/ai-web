@@ -1,6 +1,7 @@
 <script>
   import { AFile } from 'ace.svelte'
   import srpc from '$lib/srpc.js'
+  import Status from '$lib/components/Status.svelte'
   export let data
   window.srpc = srpc
   let files = null
@@ -24,6 +25,7 @@
   }
 </script>
 
+<Status></Status>
 <div class="min-h-screen w-full px-4 sm:px-10 py-10 bg-gray-100 flex flex-col items-center">
   <h1 class="text-2xl p-4">Choose your audio file</h1>
   <AFile accept=".mp3,.wav,.flac,.m4a" className="w-64 p-4" bind:files={files}>Select File</AFile>
