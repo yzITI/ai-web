@@ -6,7 +6,7 @@
   const acent = () => window.open('https://auth.njsc.ltd/acent.html?token=' + window.sessionStorage.token)
 
   const buttonList = [{
-    title: 'Acent Balance: ',
+    title: 'Acent Balance: ' + `${$balance}`,
     action: acent
   }, {
     title: 'Transcribe',
@@ -24,5 +24,4 @@
     {/each}
   </div>
 </div>
-
 <Status></Status>
