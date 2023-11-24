@@ -4,23 +4,27 @@
   import swal from 'sweetalert2'
   import Status from '$lib/components/Status.svelte'
   import AcentLine from '$lib/components/AcentLine.svelte'
+  import languages from '$lib/utilities/languages.json'
   import { status, balance, getBalance, loading } from '$lib/store.js'
   import { AIcon } from 'ace.svelte'
   import { mdiClose } from '@mdi/js'
   export let data
   let files = []
-  let prompt = ''
+  let prompt = '', language = '', format = 'srt'
   let result = ''
 
   function loadTask (t) {
     if (!t?.ok) return swal.fire('Error', t.err, 'error')
     prompt = t.prompt
+    language = t.language
+    format = t.format
     result = t.result
   }
 
   async function init () {
     $loading = true
     if (!data.user?.token) return
+    await getBalance()
     const status = await srpc.status(data.user.token)
     if (status.label !== 'transcribe') return $loading = false
     loadTask(await srpc.task(data.user.token))
@@ -36,6 +40,7 @@
   })
 
   async function submit () {
+    result = ''
     if ($status.status !== 'idle') return
     if (!files?.length) return
     if ($balance < 5) return swal.fire('Insufficient Balance', 'Your Acent balance has to be at least 5', 'error')
@@ -44,7 +49,7 @@
     const file = await toBase64(f)
     const filetype = f.name.replace(/^.*\./, '')
     $loading = true
-    const resp = await srpc.transcribe(data.user.token, file, filetype, prompt)
+    const resp = await srpc.transcribe(data.user.token, file, filetype, prompt, language, format)
     $loading = false
     if (resp.ok) return swal.fire('Success', 'Task created successfully', 'success')
     swal.fire('Error', resp.err, 'error')
@@ -74,6 +79,25 @@
     {/if}
   </AFile>
   <textarea class="w-full p-2 outline-none m-2 rounded block" rows="3" placeholder="You can prompt keywords here to increase transcribe accuracy" bind:value={prompt}></textarea>
+  <label class="flex items-center mx-2 my-4">
+    <b>Language:</b>
+    <select class="mx-2 border rounded p-1 outline-none" bind:value={language}>
+      <option value="">Auto Detect</option>
+      {#each Object.keys(languages) as l}
+        <option value={l}>{languages[l]}</option>
+      {/each}
+    </select>
+  </label>
+  <label class="flex items-center mx-2 my-4">
+    <b>Format:</b>
+    <select class="mx-2 border rounded p-1 outline-none" bind:value={format}>
+      <option>json</option>
+      <option>text</option>
+      <option>srt</option>
+      <option>verbose_json</option>
+      <option>vtt</option>
+    </select>
+  </label>
   {#if $status.status === 'idle'}
     <button on:click={submit} class="block text-white rounded-full px-6 py-2 m-2 transition-all shadow hover:shadow-md bg-blue-500 font-bold">Submit</button>
   {/if}

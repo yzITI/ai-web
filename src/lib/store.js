@@ -19,5 +19,3 @@ const breath = setInterval(async () => {
 }, 2000)
 
 export const getBalance = async () => balance.set(await acent.getBalance(window.sessionStorage.token))
-
-getBalance()
