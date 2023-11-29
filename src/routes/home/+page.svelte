@@ -11,7 +11,13 @@
     description: 'Convert audio to subtitles',
     limit: 5,
     action: () => { goto('/transcribe') }
-  }]
+  },{
+    title: 'Question',
+    description: 'Generate a reply using AI',
+    limit: 0,
+    action: () => { goto('/question') }
+  }
+]
 
   function go (b) {
     if ($balance < b.limit) return swal.fire('Insufficient Balance', '', 'error')
