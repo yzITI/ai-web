@@ -38,9 +38,8 @@
   async function submit () {
     result = ''
     if ($status.status !== 'idle') return
-
     $loading = true
-    // const resp = await srpc.question() to be continued
+    const resp = await srpc.chat(data.user.token, question);
     $loading = false
     if (resp.ok) return swal.fire('Success', 'Task created successfully', 'success')
     swal.fire('Error', resp.err, 'error')
@@ -59,5 +58,8 @@
       <button on:click={pay} class="block text-white rounded-full px-6 py-2 mr-6 transition-all shadow hover:shadow-md bg-orange-500 font-bold">Pay Result</button>
       <AcentLine></AcentLine>
     </div>
+  {/if}
+  {#if result}
+    <textarea readonly bind:value={result} class="w-full text-sm p-2 outline-none m-2 rounded block" rows="10"></textarea>
   {/if}
 </div>
