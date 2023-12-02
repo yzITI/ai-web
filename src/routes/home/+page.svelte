@@ -13,8 +13,8 @@
     action: () => { goto('/transcribe') }
   },{
     title: 'Question',
-    description: 'Generate a reply using AI',
-    limit: 0,
+    description: 'Ask anything!',
+    limit: 1,
     action: () => { goto('/question') }
   }
 ]

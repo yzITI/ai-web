@@ -3,18 +3,20 @@
   import swal from 'sweetalert2'
   import Status from '$lib/components/Status.svelte'
   import AcentLine from '$lib/components/AcentLine.svelte'
-  import languages from '$lib/utilities/languages.json'
+  import { micromark } from 'micromark'
   import { status, balance, getBalance, loading } from '$lib/store.js'
   export let data
-  let question = '', language = '', format = 'srt'
-  let result = ''
+  let question = ''
+  let result = null
+  let html
 
   function loadTask (t) {
     if (!t?.ok) return swal.fire('Error', t.err, 'error')
-    prompt = t.prompt
-    language = t.language
-    format = t.format
+    question = t.messages[0]?.content
     result = t.result
+    if (!result?.content) return
+    html = micromark(result.content.trim())
+    setTimeout(() => { window.hljs.highlightAll() })
   }
 
   async function init () {
@@ -39,17 +41,24 @@
     result = ''
     if ($status.status !== 'idle') return
     $loading = true
-    const resp = await srpc.chat(data.user.token, question);
+    const messages = [{ role: 'user', content: question }]
+    const resp = await srpc.chat(data.user.token, messages, 'gpt-3.5-turbo', 'question')
     $loading = false
-    if (resp.ok) return swal.fire('Success', 'Task created successfully', 'success')
-    swal.fire('Error', resp.err, 'error')
+    if (!resp.ok) return swal.fire('Error', resp.err, 'error')
+    $status.status = 'running'
+    swal.fire('Success', 'Task created successfully', 'success')
   }
 </script>
 
+<svelte:head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script async defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</svelte:head>
+
 <div class="w-full min-h-screen p-4 sm:p-10 bg-gray-100">
   <h1 class="text-2xl font-bold mt-4 px-2">Question</h1>
-  <p class="mb-6 px-2">Generate a reply using AI</p>
-  <textarea class="w-full p-2 outline-none m-2 rounded block" rows="3" placeholder="Be free to ask any question to Chatgpt here!" bind:value={question} on:keyup|preventDefault={(event) => event.key === 'Enter' && submit()}></textarea>
+  <p class="mb-6 px-2">Ask anything!</p>
+  <textarea class="w-full p-2 outline-none m-2 rounded block" rows="10" placeholder="Ask any question here!" bind:value={question}></textarea>
   {#if $status.status === 'idle'}
     <button on:click={submit} class="block text-white rounded-full px-6 py-2 m-2 transition-all shadow hover:shadow-md bg-blue-500 font-bold">Submit</button>
   {/if}
@@ -60,6 +69,10 @@
     </div>
   {/if}
   {#if result}
-    <textarea readonly bind:value={result} class="w-full text-sm p-2 outline-none m-2 rounded block" rows="10"></textarea>
+    <div class="mt-6 w-full text-sm p-2 outline-none m-2 rounded block bg-white rounded">
+      {@html html}
+    </div>
+    <p class="m-2 font-mono text-xs text-gray-400">Finish reason: {result.finish_reason}</p>
   {/if}
 </div>
+<Status></Status>

@@ -51,8 +51,9 @@
     $loading = true
     const resp = await srpc.transcribe(data.user.token, file, filetype, prompt, language, format)
     $loading = false
-    if (resp.ok) return swal.fire('Success', 'Task created successfully', 'success')
-    swal.fire('Error', resp.err, 'error')
+    if (!resp.ok) return swal.fire('Error', resp.err, 'error')
+    $status.status = 'running'
+    swal.fire('Success', 'Task created successfully', 'success')
   }
 
   async function pay () {
