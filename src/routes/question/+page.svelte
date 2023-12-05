@@ -6,7 +6,7 @@
   import { micromark } from 'micromark'
   import { status, balance, getBalance, loading } from '$lib/store.js'
   export let data
-  let question = ''
+  let question = '', model = 'gpt-3.5-turbo'
   let result = null
   let html
 
@@ -42,7 +42,7 @@
     if ($status.status !== 'idle') return
     $loading = true
     const messages = [{ role: 'user', content: question }]
-    const resp = await srpc.chat(data.user.token, messages, 'gpt-3.5-turbo', 'question')
+    const resp = await srpc.chat(data.user.token, messages, model, 'question')
     $loading = false
     if (!resp.ok) return swal.fire('Error', resp.err, 'error')
     $status.status = 'running'
@@ -59,6 +59,14 @@
   <h1 class="text-2xl font-bold mt-4 px-2">Question</h1>
   <p class="mb-6 px-2">Ask anything!</p>
   <textarea class="w-full p-2 outline-none m-2 rounded block" rows="10" placeholder="Ask any question here!" bind:value={question}></textarea>
+  <label class="flex items-center mx-2 my-4">
+    <b>Model:</b>
+    <select class="mx-2 border rounded p-1 outline-none" bind:value={model}>
+      <option value="gpt-3.5-turbo">3.5 Turbo</option>
+      <option value="gpt-4-1106-preview">4 Turbo</option>
+      <option value="4">4</option>
+    </select>
+  </label>
   {#if $status.status === 'idle'}
     <button on:click={submit} class="block text-white rounded-full px-6 py-2 m-2 transition-all shadow hover:shadow-md bg-blue-500 font-bold">Submit</button>
   {/if}
