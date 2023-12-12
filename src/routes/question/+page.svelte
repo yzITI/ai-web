@@ -18,6 +18,7 @@
       system = t.messages[0]?.content
       question = t.messages[1]?.content
     } else question = t.messages[0]?.content
+    model = t.model
     result = t.result
     if (!result?.content) return
     html = micromark(result.content.trim())
