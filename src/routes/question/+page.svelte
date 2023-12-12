@@ -6,13 +6,16 @@
   import { micromark } from 'micromark'
   import { status, balance, getBalance, loading } from '$lib/store.js'
   export let data
-  let question = '', model = 'gpt-3.5-turbo'
+  let question = '', system = '', model = 'gpt-3.5-turbo'
   let result = null
   let html
 
   function loadTask (t) {
     if (!t?.ok) return swal.fire('Error', t.err, 'error')
-    question = t.messages[0]?.content
+    if (t.messages[0]?.role === 'system') {
+      system = t.messages[0]?.content
+      question = t.messages[1]?.content
+    } else question = t.messages[0]?.content
     result = t.result
     if (!result?.content) return
     html = micromark(result.content.trim())
@@ -41,7 +44,9 @@
     result = ''
     if ($status.status !== 'idle') return
     $loading = true
-    const messages = [{ role: 'user', content: question }]
+    const messages = []
+    if (system.match(/\S/)) messages.push({ role: 'system', content: system })
+    messages.push({ role: 'user', content: question })
     const resp = await srpc.chat(data.user.token, messages, model, 'question')
     $loading = false
     if (!resp.ok) return swal.fire('Error', resp.err, 'error')
@@ -60,11 +65,14 @@
   <p class="mb-6 px-2">Ask anything!</p>
   <textarea class="w-full p-2 outline-none m-2 rounded block" rows="10" placeholder="Ask any question here!" bind:value={question}></textarea>
   <label class="flex items-center mx-2 my-4">
+    <b>System:</b>
+    <input bind:value={system} placeholder="Optional System Prompt" class="bg-white outline-none border w-0 px-2 py-1 bg-white ml-2 rounded grow">
+  </label>
+  <label class="flex items-center mx-2 my-4">
     <b>Model:</b>
-    <select class="mx-2 border rounded p-1 outline-none" bind:value={model}>
-      <option value="gpt-3.5-turbo">3.5 Turbo</option>
-      <option value="gpt-4-1106-preview">4 Turbo</option>
-      <option value="4">4</option>
+    <select class="mx-2 border rounded p-1 outline-none bg-white" bind:value={model}>
+      <option value="gpt-3.5-turbo">GPT 3.5 Turbo</option>
+      <option value="gpt-4-1106-preview">GPT 4 Turbo</option>
     </select>
   </label>
   {#if $status.status === 'idle'}

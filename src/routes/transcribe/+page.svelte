@@ -96,7 +96,7 @@
   <textarea class="w-full p-2 outline-none m-2 rounded block" rows="3" placeholder="You can prompt keywords here to increase transcribe accuracy" bind:value={prompt}></textarea>
   <label class="flex items-center mx-2 my-4">
     <b>Language:</b>
-    <select class="mx-2 border rounded p-1 outline-none" bind:value={language}>
+    <select class="mx-2 border rounded p-1 outline-none bg-white" bind:value={language}>
       <option value="">Auto Detect</option>
       {#each Object.keys(languages) as l}
         <option value={l}>{languages[l]}</option>
@@ -105,7 +105,7 @@
   </label>
   <label class="flex items-center mx-2 my-4">
     <b>Format:</b>
-    <select class="mx-2 border rounded p-1 outline-none" bind:value={format}>
+    <select class="mx-2 border rounded p-1 outline-none bg-white" bind:value={format}>
       <option>json</option>
       <option>text</option>
       <option>srt</option>
