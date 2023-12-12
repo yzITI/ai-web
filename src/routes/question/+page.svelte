@@ -3,12 +3,14 @@
   import swal from 'sweetalert2'
   import Status from '$lib/components/Status.svelte'
   import AcentLine from '$lib/components/AcentLine.svelte'
+  import download from '$lib/utilities/download.js'
   import { micromark } from 'micromark'
   import { status, balance, getBalance, loading } from '$lib/store.js'
   export let data
   let question = '', system = '', model = 'gpt-3.5-turbo'
   let result = null
   let html
+  let showMarkdown = false
 
   function loadTask (t) {
     if (!t?.ok) return swal.fire('Error', t.err, 'error')
@@ -19,7 +21,6 @@
     result = t.result
     if (!result?.content) return
     html = micromark(result.content.trim())
-    setTimeout(() => { window.hljs.highlightAll() })
   }
 
   async function init () {
@@ -53,6 +54,14 @@
     $status.status = 'running'
     swal.fire('Success', 'Task created successfully', 'success')
   }
+
+  function toggleMarkdown () {
+    if (showMarkdown) return showMarkdown = false
+    showMarkdown = true
+    setTimeout(() => { window.hljs.highlightAll() })
+  }
+
+  const downloadFile = () => download(result.content, 'result.' + (showMarkdown ? 'md' : 'txt'))
 </script>
 
 <svelte:head>
@@ -85,9 +94,17 @@
     </div>
   {/if}
   {#if result}
-    <div class="mt-6 w-full text-sm p-2 outline-none m-2 rounded block bg-white rounded">
-      {@html html}
+    <div class="flex w-full justify-between mt-6 px-2">
+      <button class="text-xs font-bold text-gray-700 bg-white px-3 py-1 rounded-full shadow hover:shadow-md transition-all" on:click={downloadFile}>Download result.{showMarkdown ? 'md' : 'txt'}</button>
+      <button class={'text-xs font-bold text-white px-3 py-1 rounded-full shadow hover:shadow-md transition-all ' + (showMarkdown ? 'bg-blue-500' : 'bg-gray-500')} on:click={toggleMarkdown}>Show {showMarkdown ? 'Plain Text' : 'Markdown'}</button>
     </div>
+    {#if showMarkdown}
+      <div class="m-2 w-full text-sm p-2 outline-none m-2 rounded block bg-white rounded">
+        {@html html}
+      </div>
+    {:else}
+      <textarea readonly bind:value={result.content} class="w-full text-sm p-2 outline-none m-2 rounded block font-mono" rows="10"></textarea>
+    {/if}
     <p class="m-2 font-mono text-xs text-gray-400">Finish reason: {result.finish_reason}</p>
   {/if}
 </div>

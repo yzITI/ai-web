@@ -5,6 +5,7 @@
   import Status from '$lib/components/Status.svelte'
   import AcentLine from '$lib/components/AcentLine.svelte'
   import languages from '$lib/utilities/languages.json'
+  import download from '$lib/utilities/download.js'
   import { status, balance, getBalance, loading } from '$lib/store.js'
   import { AIcon } from 'ace.svelte'
   import { mdiClose } from '@mdi/js'
@@ -63,19 +64,7 @@
     getBalance()
   }
 
-  async function download () {
-    const blob = new Blob([result], { type: 'text/plain;charset=utf-8;' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.style = 'visibility: hidden;'
-    link.download = 'transcribe.' + format.replace(/.*?_/, '')
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
-  window.download = r => {
-    result = r
-  }
+  const downloadFile = () => download(result, 'transcribe.' + format.replace(/.*?_/, ''))
 </script>
 
 <Status></Status>
@@ -123,7 +112,7 @@
     </div>
   {/if}
   {#if result}
-    <button class="text-xs font-bold text-gray-700 bg-white px-3 py-1 rounded-full shadow hover:shadow-md transition-all mx-2 mt-4" on:click={download}>Download transcribe.{format.replace(/.*?_/, '')}</button>
+    <button class="text-xs font-bold text-gray-700 bg-white px-3 py-1 rounded-full shadow hover:shadow-md transition-all mx-2 mt-4" on:click={downloadFile}>Download transcribe.{format.replace(/.*?_/, '')}</button>
     <textarea readonly bind:value={result} class="w-full text-sm p-2 outline-none m-2 rounded block" rows="10"></textarea>
   {/if}
 </div>
